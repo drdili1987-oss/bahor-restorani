@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="uz" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bahor Restorani | Haqiqiy Sharqona Ta'mlar va Milliy Fayz</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Playfair Display (sharqona nafislik) va Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Ikonkalar -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            100: '#FEF3C7',
+                            200: '#FDE68A',
+                            300: '#FCD34D',
+                            400: '#FBBF24',
+                            500: '#F59E0B',
+                            600: '#D97706',
+                            700: '#B45309',
+                        },
+                        dark: {
+                            base: '#0B0B0C',
+                            surface: '#141416',
+                            card: '#1B1B1F',
+                            border: '#2A2A32'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        ornate: ['Cinzel', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Milliy Islimiy Naqsh Fon Teksturasi */
+        .pattern-bg {
+            background-color: #0B0B0C;
+            background-image: radial-gradient(rgba(245, 158, 11, 0.08) 1.5px, transparent 1.5px), radial-gradient(rgba(245, 158, 11, 0.04) 1.5px, #0B0B0C 1.5px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+
+        .gold-glow {
+            text-shadow: 0 0 25px rgba(245, 158, 11, 0.45);
+        }
+        
+        .gold-border-gradient {
+            border-image: linear-gradient(135deg, #F59E0B, #78350F, #F59E0B) 1;
+        }
+
+        /* Maxsus Oltin Gradientlar */
+        .text-gold-gradient {
+            background: linear-gradient(135deg, #FFFBEB 0%, #FBBF24 50%, #D97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-gold-gradient {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-gold-gradient:hover {
+            background: linear-gradient(135deg, #FBBF24 0%, #B45309 100%);
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.45);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0B0C;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F59E0B;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="pattern-bg text-gray-200 font-sans antialiased selection:bg-gold-500 selection:text-black min-h-screen">
+
+    <!-- XABARNOMA / MODAL BILDIRISHNOMALAR UCHUN -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-32 opacity-0 transition-all duration-300 pointer-events-none bg-dark-card border border-gold-500/50 text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-gold-500 text-lg"></i>
+        <span id="toast-message" class="text-sm font-medium">Amal muvaffaqiyatli bajarildi!</span>
+    </div>
+
+    <!-- SAVAT (CART DRAWER) -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 hidden transition-opacity duration-300">
+        <div onclick="toggleCart()" class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-dark-surface border-l border-gold-500/20 p-6 flex flex-col justify-between shadow-2xl transform transition-transform duration-300">
+            <div>
+                <div class="flex items-center justify-between pb-4 border-b border-dark-border">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-basket-shopping text-gold-500 text-xl"></i>
+                        <h3 class="font-ornate text-xl font-bold text-white tracking-wider">Sizning Savatingiz</h3>
+                    </div>
+                    <button onclick="toggleCart()" class="text-gray-400 hover:text-white transition-colors p-2 text-xl">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="cart-items" class="mt-4 space-y-3 max-h-[55vh] overflow-y-auto pr-1">
+                    <!-- Savat bo'sh holati -->
+                    <div id="empty-cart-view" class="text-center py-14 text-gray-400">
+                        <i class="fa-solid fa-utensils text-4xl text-gray-600 mb-3 block"></i>
+                        <p class="text-sm">Hozircha savatingiz bo'sh.</p>
+                        <p class="text-xs text-gray-500 mt-1">Mazali taomlarimizni tanlang!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-dark-border pt-4">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-gray-400 font-medium">Jami to'lov:</span>
+                    <span id="cart-total-price" class="text-2xl font-bold text-gold-400">0 so'm</span>
+                </div>
+                <button onclick="checkoutOrder()" class="w-full btn-gold-gradient text-black font-bold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-lg">
+                    <i class="fa-brands fa-telegram text-lg"></i>
+                    <span>Telegram orqali buyurtma</span>
+                </button>
+                <p class="text-center text-xs text-gray-500 mt-2">Operatorimiz 5 daqiqada tasdiqlash uchun bog'lanadi</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <header class="sticky top-0 z-40 bg-dark-base/90 backdrop-blur-md border-b border-gold-500/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <a href="#hero" class="flex items-center gap-3 group">
+                    <div class="w-12 h-12 rounded-full border border-gold-400/50 flex items-center justify-center bg-gradient-to-tr from-gold-600/30 to-black group-hover:border-gold-400 transition-colors">
+                        <svg class="w-7 h-7 text-gold-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5L12 2Z" fill="rgba(245,158,11,0.2)"/>
+                            <circle cx="12" cy="12" r="3" fill="#F59E0B"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="font-ornate text-2xl font-bold tracking-widest text-gold-gradient block leading-none">BAHOR</span>
+                        <span class="text-[10px] uppercase tracking-widest text-gray-400 font-medium">Milliy Kafe & Choyxona</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex items-center space-x-8 text-sm font-medium">
+                    <a href="#hero" class="text-gold-400 hover:text-white transition-colors">Bosh sahifa</a>
+                    <a href="#signature" class="text-gray-300 hover:text-gold-400 transition-colors">Maxsus taomlar</a>
+                    <a href="#menu" class="text-gray-300 hover:text-gold-400 transition-colors">Menyu</a>
+                    <a href="#atmosphere" class="text-gray-300 hover:text-gold-400 transition-colors">Muhit</a>
+                    <a href="#booking" class="text-gray-300 hover:text-gold-400 transition-colors">Joy band qilish</a>
+                    <a href="#contact" class="text-gray-300 hover:text-gold-400 transition-colors">Bog'lanish</a>
+                </nav>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-4">
+                    <a href="tel:+998712000000" class="hidden lg:flex items-center gap-2 text-sm text-gray-300 hover:text-gold-400 transition-colors">
+                        <div class="w-8 h-8 rounded-full bg-gold-500/10 flex items-center justify-center text-gold-400">
+                            <i class="fa-solid fa-phone text-xs"></i>
+                        </div>
+                        <span class="font-semibold">+998 (71) 200-00-00</span>
+                    </a>
+
+                    <!-- Savat tugmasi -->
+                    <button onclick="toggleCart()" class="relative p-2.5 rounded-xl bg-dark-card border border-gold-500/30 text-gold-400 hover:text-white hover:border-gold-400 transition-colors">
+                        <i class="fa-solid fa-basket-shopping text-lg"></i>
+                        <span id="cart-badge" class="absolute -top-1.5 -right-1.5 bg-gold-500 text-black font-extrabold text-[10px] w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                    </button>
+
+                    <!-- Joy band qilish -->
+                    <a href="#booking" class="hidden sm:inline-flex btn-gold-gradient text-black font-semibold text-sm px-5 py-2.5 rounded-xl">
+                        Stol band qilish
+                    </a>
+
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-gold-400 p-2">
+                        <i class="fa-solid fa-bars-staggered text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-dark-surface border-b border-dark-border px-6 py-5 space-y-4">
+            <a href="#hero" onclick="toggleMobileMenu()" class="block text-gray-200 hover:text-gold-400 font-medium py-1">Bosh sahifa</a>
+            <a href="#signature" onclick="toggleMobileMenu()" class="block text-gray-200 hover:text-gold-400 font-medium py-1">Maxsus taomlar</a>
+            <a href="#menu" onclick="toggleMobileMenu()" class="block text-gray-200 hover:text-gold-400 font-medium py-1">Menyu</a>
+            <a href="#atmosphere" onclick="toggleMobileMenu()" class="block text-gray-200 hover:text-gold-400 font-medium py-1">Muhit & Galereya</a>
+            <a href="#booking" onclick="toggleMobileMenu()" class="block text-gray-200 hover:text-gold-400 font-medium py-1">Joy band qilish</a>
+            <a href="#contact" onclick="toggleMobileMenu()" class="block text-gray-200 hover:text-gold-400 font-medium py-1">Bog'lanish</a>
+            <div class="pt-2">
+                <a href="#booking" onclick="toggleMobileMenu()" class="block text-center btn-gold-gradient text-black font-bold py-2.5 rounded-xl">
+                    Stol band qilish
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section id="hero" class="relative min-h-[90vh] flex items-center justify-center overflow-hidden py-16">
+        <!-- Sharqona Naqshli Orqa fon overlay -->
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold-500/15 via-dark-base/80 to-dark-base"></div>
+        <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: url('https://www.transparenttextures.com/patterns/arabesque.png');"></div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <!-- Badge -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold-500/40 bg-gold-500/10 text-gold-400 text-xs sm:text-sm font-medium mb-6">
+                <i class="fa-solid fa-crown text-xs"></i>
+                <span>Toshkentning eng fayzli milliy maskani</span>
+                <i class="fa-solid fa-crown text-xs"></i>
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold font-ornate tracking-wide text-white leading-tight max-w-4xl mx-auto">
+                Haqiqiy Sharqona Ta'mlar va <span class="text-gold-gradient gold-glow">Milliy Fayz</span>
+            </h1>
+
+            <p class="mt-6 text-gray-300 max-w-2xl mx-auto text-base sm:text-lg font-light leading-relaxed">
+                Bahor kafesida ota-bobolarimizdan meros qolgan xushbo'y o'choq taomlari, xonadon mehmondo'stligi va fusunkor sharqona muhitdan bahramand bo'ling.
+            </p>
+
+            <!-- Buttons -->
+            <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="#menu" class="w-full sm:w-auto btn-gold-gradient text-black font-bold px-8 py-4 rounded-xl flex items-center justify-center gap-3 shadow-xl">
+                    <span>Menyu bilan tanishish</span>
+                    <i class="fa-solid fa-arrow-down text-sm"></i>
+                </a>
+                <a href="#booking" class="w-full sm:w-auto bg-dark-card hover:bg-dark-border text-white border border-gold-500/40 font-semibold px-8 py-4 rounded-xl flex items-center justify-center gap-3 transition-colors">
+                    <i class="fa-regular fa-calendar-check text-gold-400"></i>
+                    <span>Stol / So'ri band qilish</span>
+                </a>
+            </div>
+
+            <!-- Stats / Xususiyatlar -->
+            <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-5xl mx-auto pt-8 border-t border-dark-border/60">
+                <div class="p-4 rounded-2xl bg-dark-card/60 border border-gold-500/10">
+                    <span class="block text-3xl sm:text-4xl font-extrabold text-gold-400 font-ornate">15+</span>
+                    <span class="text-xs sm:text-sm text-gray-400 mt-1 block">Yillik tajriba</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-dark-card/60 border border-gold-500/10">
+                    <span class="block text-3xl sm:text-4xl font-extrabold text-gold-400 font-ornate">60+</span>
+                    <span class="text-xs sm:text-sm text-gray-400 mt-1 block">Nafis milliy taomlar</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-dark-card/60 border border-gold-500/10">
+                    <span class="block text-3xl sm:text-4xl font-extrabold text-gold-400 font-ornate">100%</span>
+                    <span class="text-xs sm:text-sm text-gray-400 mt-1 block">Halol & Toza mahsulot</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-dark-card/60 border border-gold-500/10">
+                    <span class="block text-3xl sm:text-4xl font-extrabold text-gold-400 font-ornate">250+</span>
+                    <span class="text-xs sm:text-sm text-gray-400 mt-1 block">O'rinli qulay xonalar</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SIGNATURE TAOMLAR (MAXSUS TAKLIFLAR) -->
+    <section id="signature" class="py-20 bg-dark-surface/60 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-14">
+                <div class="flex items-center justify-center gap-3 text-gold-400 mb-2">
+                    <span class="h-px w-10 bg-gold-500/50"></span>
+                    <i class="fa-solid fa-utensils"></i>
+                    <span class="h-px w-10 bg-gold-500/50"></span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-bold font-ornate text-white">Bosh Oshpaz Shodiyonalari</h2>
+                <p class="text-gray-400 text-sm mt-3">Mehmonlarimizning sevimli, har kuni o'zgacha mehr bilan tayyorlanadigan durdona taomlar</p>
+            </div>
+
+            <!-- Signature Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 1: To'y Oshi -->
+                <div class="bg-dark-card rounded-2xl border border-gold-500/20 overflow-hidden hover:border-gold-500/60 transition-all duration-300 flex flex-col group hover:-translate-y-1 shadow-xl">
+                    <div class="relative h-60 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?q=80&w=800&auto=format&fit=crop" 
+                             alt="Toshkent To'y Oshi" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                             onerror="this.src='https://placehold.co/600x400/1b1b1f/F59E0B?text=Toshkent+To%27y+Oshi'">
+                        <div class="absolute top-3 left-3 bg-gold-500 text-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                            Tavsiya etiladi
+                        </div>
+                        <div class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-gold-400 font-bold px-3 py-1.5 rounded-lg border border-gold-500/30 text-sm">
+                            48 000 so'm
+                        </div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold font-ornate text-white group-hover:text-gold-400 transition-colors">Toshkentcha To'y Oshi</h3>
+                            <p class="text-gray-400 text-xs mt-2 line-clamp-2">Lazer guruchi, sarxil dumba yog'i, barra qo'y go'shti, qazi, bedana tuxumi va mayiz bilan o'choqda damlangan.</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-dark-border flex items-center justify-between">
+                            <span class="text-xs text-gray-500"><i class="fa-regular fa-clock mr-1"></i> Har kuni 11:30 dan</span>
+                            <button onclick="addToCart('Toshkentcha To\'y Oshi', 48000, 'https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?q=80&w=200&auto=format&fit=crop')" class="btn-gold-gradient text-black px-4 py-2 rounded-lg text-xs font-bold hover:shadow flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> Savatga
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2: Tandir Jiz va Somsa -->
+                <div class="bg-dark-card rounded-2xl border border-gold-500/20 overflow-hidden hover:border-gold-500/60 transition-all duration-300 flex flex-col group hover:-translate-y-1 shadow-xl">
+                    <div class="relative h-60 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop" 
+                             alt="Tandir Go'sht va Jiz" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                             onerror="this.src='https://placehold.co/600x400/1b1b1f/F59E0B?text=Tandir+Jiz'">
+                        <div class="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                            Xit Taom
+                        </div>
+                        <div class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-gold-400 font-bold px-3 py-1.5 rounded-lg border border-gold-500/30 text-sm">
+                            95 000 so'm / ports.
+                        </div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold font-ornate text-white group-hover:text-gold-400 transition-colors">Tandir Jiz (Maxsus)</h3>
+                            <p class="text-gray-400 text-xs mt-2 line-clamp-2">Tog' archasi tutunida tandirda toblangan mayin qo'y go'shti, piyozli maxsus marinad va yangi yopilgan tandir non bilan.</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-dark-border flex items-center justify-between">
+                            <span class="text-xs text-gray-500"><i class="fa-solid fa-fire-burner mr-1 text-gold-500"></i> Tandirda pishgan</span>
+                            <button onclick="addToCart('Tandir Jiz (Maxsus)', 95000, 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=200&auto=format&fit=crop')" class="btn-gold-gradient text-black px-4 py-2 rounded-lg text-xs font-bold hover:shadow flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> Savatga
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3: Shashlik Assorti -->
+                <div class="bg-dark-card rounded-2xl border border-gold-500/20 overflow-hidden hover:border-gold-500/60 transition-all duration-300 flex flex-col group hover:-translate-y-1 shadow-xl">
+                    <div class="relative h-60 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800&auto=format&fit=crop" 
+                             alt="Shashlik Assorti" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                             onerror="this.src='https://placehold.co/600x400/1b1b1f/F59E0B?text=Shashlik+Assorti'">
+                        <div class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-gold-400 font-bold px-3 py-1.5 rounded-lg border border-gold-500/30 text-sm">
+                            120 000 so'm
+                        </div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold font-ornate text-white group-hover:text-gold-400 transition-colors">Sharqona Shashlik Seti</h3>
+                            <p class="text-gray-400 text-xs mt-2 line-clamp-2">G'ijduvoncha qiymali, kuskovoy qo'y go'shti, dumba va jigar kaboblari. Sirkaga to'g'ralgan shirin piyoz bilan tortiladi.</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-dark-border flex items-center justify-between">
+                            <span class="text-xs text-gray-500"><i class="fa-solid fa-utensils mr-1"></i> 5 xil six shashlik</span>
+                            <button onclick="addToCart('Sharqona Shashlik Seti', 120000, 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=200&auto=format&fit=crop')" class="btn-gold-gradient text-black px-4 py-2 rounded-lg text-xs font-bold hover:shadow flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> Savatga
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MENYU VA FILTERLAR -->
+    <section id="menu" class="py-20 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+                <div>
+                    <span class="text-gold-400 text-xs uppercase tracking-widest font-semibold">Bizning Boy Tanlov</span>
+                    <h2 class="text-3xl sm:text-5xl font-bold font-ornate text-white mt-2">To'liq Menyu</h2>
+                </div>
+                
+                <!-- Qidiruv maydoni -->
+                <div class="mt-4 md:mt-0 relative w-full md:w-72">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400 text-sm"></i>
+                    <input type="text" id="menu-search" oninput="filterMenu()" placeholder="Taom nomini qidirish..." class="w-full bg-dark-card border border-dark-border focus:border-gold-500 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none transition-colors">
+                </div>
+            </div>
+
+            <!-- Kategoriya Filterlari -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-none mb-10" id="filter-buttons">
+                <button onclick="setActiveCategory('all', this)" class="menu-cat-btn active px-6 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-gold-500 text-black shadow-md">
+                    Barchasi
+                </button>
+                <button onclick="setActiveCategory('milliy', this)" class="menu-cat-btn px-6 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-dark-card text-gray-300 hover:text-white hover:border-gold-500 border border-dark-border">
+                    Milliy Taomlar
+                </button>
+                <button onclick="setActiveCategory('kabob', this)" class="menu-cat-btn px-6 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-dark-card text-gray-300 hover:text-white hover:border-gold-500 border border-dark-border">
+                    Kabob & Mangal
+                </button>
+                <button onclick="setActiveCategory('somsa', this)" class="menu-cat-btn px-6 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-dark-card text-gray-300 hover:text-white hover:border-gold-500 border border-dark-border">
+                    Tandir & Pishiriqlar
+                </button>
+                <button onclick="setActiveCategory('shirinlik', this)" class="menu-cat-btn px-6 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-dark-card text-gray-300 hover:text-white hover:border-gold-500 border border-dark-border">
+                    Shirinlik & Choyxona
+                </button>
+            </div>
+
+            <!-- Taomlar Ro'yxati -->
+            <div id="menu-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Javascript orqali dinamik render qilinadi -->
+            </div>
+        </div>
+    </section>
+
+    <!-- KAFE MUHITI VA FOTO GALEREYA -->
+    <section id="atmosphere" class="py-20 bg-dark-surface/50 border-y border-dark-border/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-14">
+                <h2 class="text-3xl sm:text-4xl font-bold font-ornate text-white">Bahor Kafesi Muhiti</h2>
+                <p class="text-gray-400 text-sm mt-3">Shinam topchanlar, milliy gilamlar va osuda choyxona fayzi bilan unutilmas hordiq chiqaring</p>
+            </div>
+
+            <!-- Galereya Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="relative group rounded-2xl overflow-hidden h-64 border border-gold-500/10">
+                    <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=700&auto=format&fit=crop" alt="Sharqona Zal" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x600/141416/F59E0B?text=Sharqona+Zal'">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
+                        <span class="text-xs font-semibold text-white">Umumiy Sharqona Zal</span>
+                    </div>
+                </div>
+                <div class="relative group rounded-2xl overflow-hidden h-64 border border-gold-500/10 md:col-span-2">
+                    <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?q=80&w=1000&auto=format&fit=crop" alt="Milliy So'ri va Topchan" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/800x400/141416/F59E0B?text=Milliy+So%27ri'">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
+                        <span class="text-xs font-semibold text-white">Oila va Ulfatlar uchun Keng Topchanlar</span>
+                    </div>
+                </div>
+                <div class="relative group rounded-2xl overflow-hidden h-64 border border-gold-500/10">
+                    <img src="https://images.unsplash.com/photo-1541544741938-0af808871cc0?q=80&w=700&auto=format&fit=crop" alt="Choyxona an'anasi" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x600/141416/F59E0B?text=Choyxona'">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
+                        <span class="text-xs font-semibold text-white">Xushbo'y Ko'k Choy & Shirinliklar</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- JOY BAND QILISH (BOOKING FORM) -->
+    <section id="booking" class="py-20 relative">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-dark-card border border-gold-500/30 rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden">
+                <!-- Bezak elementlar -->
+                <div class="absolute top-0 right-0 w-48 h-48 bg-gold-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="text-center max-w-xl mx-auto mb-10">
+                    <span class="text-gold-400 text-xs font-bold uppercase tracking-widest">Qulaylik va ehtirom</span>
+                    <h2 class="text-3xl sm:text-4xl font-bold font-ornate text-white mt-1">Stol yoki So'ri Band Qiling</h2>
+                    <p class="text-gray-400 text-xs sm:text-sm mt-2">Oilaviy tadbirlar, iftorlik, do'stona suhbatlar uchun oldindan joy band qilib qo'ying</p>
+                </div>
+
+                <form id="booking-form" onsubmit="handleBooking(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <!-- Ism -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Ismingiz *</label>
+                            <input type="text" required placeholder="Masalan: Azizbek" class="w-full bg-dark-surface border border-dark-border focus:border-gold-500 rounded-xl py-3 px-4 text-sm text-white placeholder-gray-500 focus:outline-none transition-colors">
+                        </div>
+
+                        <!-- Telefon raqam -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Telefon raqamingiz *</label>
+                            <input type="tel" required placeholder="+998 90 123 45 67" class="w-full bg-dark-surface border border-dark-border focus:border-gold-500 rounded-xl py-3 px-4 text-sm text-white placeholder-gray-500 focus:outline-none transition-colors">
+                        </div>
+
+                        <!-- Sana -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Sana *</label>
+                            <input type="date" required id="booking-date" class="w-full bg-dark-surface border border-dark-border focus:border-gold-500 rounded-xl py-3 px-4 text-sm text-white focus:outline-none transition-colors">
+                        </div>
+
+                        <!-- Vaqt -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Vaqt *</label>
+                            <input type="time" required value="18:00" class="w-full bg-dark-surface border border-dark-border focus:border-gold-500 rounded-xl py-3 px-4 text-sm text-white focus:outline-none transition-colors">
+                        </div>
+
+                        <!-- Mehmonlar soni -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Mehmonlar soni</label>
+                            <select class="w-full bg-dark-surface border border-dark-border focus:border-gold-500 rounded-xl py-3 px-4 text-sm text-white focus:outline-none transition-colors">
+                                <option value="2">2 kishi</option>
+                                <option value="4" selected>4 - 6 kishi</option>
+                                <option value="8">8 - 12 kishi</option>
+                                <option value="15">15+ kishi (Katta tadbir)</option>
+                            </select>
+                        </div>
+
+                        <!-- Joy turi -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Joylashuv turi</label>
+                            <select class="w-full bg-dark-surface border border-dark-border focus:border-gold-500 rounded-xl py-3 px-4 text-sm text-white focus:outline-none transition-colors">
+                                <option value="zal">Umumiy Zal (Yevropa stollari)</option>
+                                <option value="topchan" selected>Milliy So'ri / Topchan (Xontaxta)</option>
+                                <option value="vip">Alohida VIP Xona</option>
+                                <option value="ayvon">Ochiq Havoli Ayvon</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Qo'shimcha istaklar -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-2">Qo'shimcha istaklar yoki maxsus talablar</label>
+                        <textarea rows="3" placeholder="Masalan: Bolalar stuli kerak yoki tug'ilgan kun bezaklari..." class="w-full bg-dark-surface border border-dark-border focus:border-gold-500 rounded-xl py-3 px-4 text-sm text-white placeholder-gray-500 focus:outline-none transition-colors"></textarea>
+                    </div>
+
+                    <div class="text-center pt-2">
+                        <button type="submit" class="w-full sm:w-auto btn-gold-gradient text-black font-bold text-base px-10 py-3.5 rounded-xl shadow-lg">
+                            <i class="fa-solid fa-check mr-2"></i> Band qilishni tasdiqlash
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- MANZIL VA ALOQA -->
+    <footer id="contact" class="bg-dark-base border-t border-gold-500/20 pt-16 pb-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-dark-border">
+                <!-- 1: Logo & Haqida -->
+                <div class="md:col-span-1">
+                    <a href="#hero" class="flex items-center gap-2 mb-4">
+                        <span class="font-ornate text-2xl font-bold tracking-widest text-gold-gradient">BAHOR</span>
+                    </a>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        Milliy taomlar, xushbo'y shashliklar va haqiqiy o'zbekona mehmondo'stlik maskani. Sizni kutib olishdan mamnunmiz!
+                    </p>
+                    <div class="flex items-center gap-3 mt-5">
+                        <a href="https://t.me" target="_blank" class="w-9 h-9 rounded-full bg-dark-card border border-dark-border flex items-center justify-center text-gold-400 hover:border-gold-400 hover:text-white transition-colors">
+                            <i class="fa-brands fa-telegram"></i>
+                        </a>
+                        <a href="https://instagram.com" target="_blank" class="w-9 h-9 rounded-full bg-dark-card border border-dark-border flex items-center justify-center text-gold-400 hover:border-gold-400 hover:text-white transition-colors">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                        <a href="https://facebook.com" target="_blank" class="w-9 h-9 rounded-full bg-dark-card border border-dark-border flex items-center justify-center text-gold-400 hover:border-gold-400 hover:text-white transition-colors">
+                            <i class="fa-brands fa-facebook-f text-sm"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 2: Tezkor Menyu -->
+                <div>
+                    <h4 class="text-white font-ornate text-sm font-bold uppercase tracking-wider mb-4">Bo'limlar</h4>
+                    <ul class="space-y-2 text-xs text-gray-400">
+                        <li><a href="#hero" class="hover:text-gold-400 transition-colors">Bosh sahifa</a></li>
+                        <li><a href="#menu" class="hover:text-gold-400 transition-colors">Taomlar menyusi</a></li>
+                        <li><a href="#signature" class="hover:text-gold-400 transition-colors">Bosh oshpaz taklifi</a></li>
+                        <li><a href="#booking" class="hover:text-gold-400 transition-colors">Joy band qilish</a></li>
+                    </ul>
+                </div>
+
+                <!-- 3: Ish tartibi -->
+                <div>
+                    <h4 class="text-white font-ornate text-sm font-bold uppercase tracking-wider mb-4">Ish Tartibi</h4>
+                    <ul class="space-y-2 text-xs text-gray-400">
+                        <li class="flex justify-between">
+                            <span>Dushanba - Juma:</span>
+                            <span class="text-white font-medium">10:00 - 23:00</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>Shanba - Yakshanba:</span>
+                            <span class="text-white font-medium">10:00 - 00:00</span>
+                        </li>
+                        <li class="pt-2 text-gold-400">
+                            <i class="fa-regular fa-clock mr-1"></i> Osh tarqatish: 11:30 - 15:00
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 4: Manzil -->
+                <div>
+                    <h4 class="text-white font-ornate text-sm font-bold uppercase tracking-wider mb-4">Manzilimiz</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        <i class="fa-solid fa-location-dot text-gold-400 mr-1.5"></i>
+                        Toshkent shahri, Yunusobod tumani, Amir Temur shoh ko'chasi 14-uy
+                    </p>
+                    <p class="text-xs text-gray-400 mt-2">
+                        <i class="fa-solid fa-phone text-gold-400 mr-1.5"></i>
+                        +998 (71) 200-00-00
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1">
+                        <i class="fa-solid fa-envelope text-gold-400 mr-1.5"></i>
+                        info@bahorcafe.uz
+                    </p>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="mt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-3">
+                <p>&copy; 2026 Bahor Kafe. Barcha huquqlar himoyalangan.</p>
+                <p class="text-gray-400 flex items-center gap-1">
+                    Milliy nafosat va mehmondo'stlik bilan yaratildi
+                    <i class="fa-solid fa-heart text-gold-500 text-[10px]"></i>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERAKTIV JAVASCRIPT LOGIKASI -->
+    <script>
+        // Taomlar bazasi
+        const menuData = [
+            {
+                id: 1,
+                name: "Toshkentcha To'y Oshi",
+                category: "milliy",
+                price: 48000,
+                desc: "Lazer guruch, barra go'sht, qazi, mayiz va bedana tuxumi",
+                img: "https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?q=80&w=400&auto=format&fit=crop"
+            },
+            {
+                id: 2,
+                name: "Chuchvara Sho'rva",
+                category: "milliy",
+                price: 36000,
+                desc: "Qo'lda tugilgan jajji chuchvaralar va mazali go'sht suvi",
+                img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=400&auto=format&fit=crop"
+            },
+            {
+                id: 3,
+                name: "Manti (Go'shtli)",
+                category: "milliy",
+                price: 42000,
+                desc: "Yupqa xamir, mayin mol va qo'y go'shti qiyma, dumba bilan (4 dona)",
+                img: "https://images.unsplash.com/photo-1496116218417-1a781b1c416c?q=80&w=400&auto=format&fit=crop"
+            },
+            {
+                id: 4,
+                name: "G'ijduvoncha Qiymali Shashlik",
+                category: "kabob",
+                price: 24000,
+                desc: "Mashhur usulda tayyorlangan yumshoq va sersuv qiymali kabob",
+                img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=400&auto=format&fit=crop"
+            },
+            {
+                id: 5,
+                name: "Kuskovoy Qo'y Kabob",
+                category: "kabob",
+                price: 28000,
+                desc: "Xushbo'y ziralangan barra qo'y go'shti va dumba bo'laklari",
+                img: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?q=80&w=400&auto=format&fit=crop"
+            },
+            {
+                id: 6,
+                name: "Tovuq Qanotlari (Mangalda)",
+                category: "kabob",
+                price: 22000,
+                desc: "Qarsildoq po'stloqli va o'zgacha marinadlangan qanotchalar",
+                img: "https://images.unsplash.com/photo-1527477378370-fd223a57f864?q=80&w=400&auto=format&fit=crop"
+            },
+            {
+                id: 7,
+                name: "Tandir Somsa (Go'shtli)",
+                category: "somsa",
+                price: 16000,
+                desc: "Loy tandirda yopilgan, qarsildoq qatlamali va go'shtga to'la somsa",
+                img: "https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=400&auto=format&fit=crop"
+            },
+            {
+                id: 8,
+                name: "Qovoqli Shirin Somsa",
+                category: "somsa",
+                price: 12000,
+                desc: "Shirin qovoq va zira bilan to'ldirilgan xushta'm tandir somsa",
+                img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop"
+            },
+            {
+                id: 9,
+                name: "Maxsus Patir Non",
+                category: "somsa",
+                price: 14000,
+                desc: "Sariyog' va sedana sepib yangi yopilgan issiq pech patiri",
+                img: "https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?q=80&w=400&auto=format&fit=crop"
+            },
+            {
+                id: 10,
+                name: "Choyxona To'plami (Choy & Shirinlik)",
+                category: "shirinlik",
+                price: 35000,
+                desc: "Ko'k yoki qora choy, navvot, pashmak, mayiz, yong'oq va asal",
+                img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?q=80&w=400&auto=format&fit=crop"
+            },
+            {
+                id: 11,
+                name: "Sharqona Paxlava",
+                category: "shirinlik",
+                price: 28000,
+                desc: "Yong'oqli, asal sharbatiga to'yingan qatlama sharq shirinligi",
+                img: "https://images.unsplash.com/photo-1519869325930-281384150729?q=80&w=400&auto=format&fit=crop"
+            },
+            {
+                id: 12,
+                name: "Tog' Giyohlari bilan Damlama Choy",
+                category: "shirinlik",
+                price: 18000,
+                desc: "Kiyiko't, yalpiz, limon va tog' asali qo'shilgan choynak choy",
+                img: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?q=80&w=400&auto=format&fit=crop"
+            }
+        ];
+
+        // Savat holati
+        let cart = [];
+        let currentCategory = 'all';
+
+        // Sahifa yuklanganda ishga tushirish
+        window.onload = function() {
+            renderMenu();
+            // Bugungi sanani bron shakliga min qilish
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('booking-date').min = today;
+            document.getElementById('booking-date').value = today;
+        };
+
+        // Menyu render qilish
+        function renderMenu() {
+            const grid = document.getElementById('menu-grid');
+            const searchVal = document.getElementById('menu-search').value.toLowerCase().trim();
+
+            const filtered = menuData.filter(item => {
+                const matchesCat = (currentCategory === 'all' || item.category === currentCategory);
+                const matchesSearch = item.name.toLowerCase().includes(searchVal) || item.desc.toLowerCase().includes(searchVal);
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <i class="fa-solid fa-bowl-food text-4xl mb-3 block"></i>
+                        <p class="text-base">Kechirasiz, bunday taom topilmadi.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(item => `
+                <div class="bg-dark-card border border-dark-border rounded-2xl overflow-hidden hover:border-gold-500/40 transition-all flex flex-col justify-between group shadow-lg">
+                    <div>
+                        <div class="relative h-44 overflow-hidden">
+                            <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/400x300/141416/F59E0B?text=Bahor+Kafe'">
+                            <span class="absolute top-2 right-2 bg-black/80 backdrop-blur-md text-gold-400 text-xs font-bold px-2.5 py-1 rounded-md border border-gold-500/30">
+                                ${formatPrice(item.price)}
+                            </span>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-bold text-white text-base font-ornate group-hover:text-gold-400 transition-colors">${item.name}</h4>
+                            <p class="text-gray-400 text-xs mt-1.5 leading-relaxed line-clamp-2">${item.desc}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0">
+                        <button onclick="addToCart('${item.name}', ${item.price}, '${item.img}')" class="w-full bg-dark-surface hover:bg-gold-500 text-gold-400 hover:text-black border border-gold-500/30 font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                            <span>Savatga qo'shish</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Kategoriya tanlash
+        function setActiveCategory(cat, btn) {
+            currentCategory = cat;
+            document.querySelectorAll('.menu-cat-btn').forEach(b => {
+                b.classList.remove('bg-gold-500', 'text-black', 'shadow-md');
+                b.classList.add('bg-dark-card', 'text-gray-300', 'border', 'border-dark-border');
+            });
+            btn.classList.add('bg-gold-500', 'text-black', 'shadow-md');
+            btn.classList.remove('bg-dark-card', 'text-gray-300', 'border', 'border-dark-border');
+            renderMenu();
+        }
+
+        // Qidiruv
+        function filterMenu() {
+            renderMenu();
+        }
+
+        // Narxni formatlash
+        function formatPrice(num) {
+            return num.toLocaleString('uz-UZ') + " so'm";
+        }
+
+        // Savatga qo'shish
+        function addToCart(name, price, img) {
+            const existing = cart.find(i => i.name === name);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ name, price, img, quantity: 1 });
+            }
+            updateCartUI();
+            showToast(`"${name}" savatga qo'shildi!`);
+        }
+
+        // Savat miqdorini o'zgartirish
+        function changeQty(name, delta) {
+            const item = cart.find(i => i.name === name);
+            if (!item) return;
+
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.name !== name);
+            }
+            updateCartUI();
+        }
+
+        // Savat interfeysini yangilash
+        function updateCartUI() {
+            const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            document.getElementById('cart-badge').innerText = totalQty;
+            document.getElementById('cart-total-price').innerText = formatPrice(totalPrice);
+
+            const container = document.getElementById('cart-items');
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div id="empty-cart-view" class="text-center py-14 text-gray-400">
+                        <i class="fa-solid fa-utensils text-4xl text-gray-600 mb-3 block"></i>
+                        <p class="text-sm">Hozircha savatingiz bo'sh.</p>
+                        <p class="text-xs text-gray-500 mt-1">Mazali taomlarimizni tanlang!</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = cart.map(item => `
+                    <div class="flex items-center justify-between bg-dark-card p-3 rounded-xl border border-dark-border gap-3">
+                        <img src="${item.img}" alt="${item.name}" class="w-12 h-12 rounded-lg object-cover">
+                        <div class="flex-1 min-w-0">
+                            <h5 class="text-xs font-bold text-white truncate">${item.name}</h5>
+                            <span class="text-xs text-gold-400 font-semibold">${formatPrice(item.price)}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="changeQty('${item.name}', -1)" class="w-6 h-6 rounded-md bg-dark-surface border border-dark-border flex items-center justify-center text-xs text-gray-300 hover:text-white">-</button>
+                            <span class="text-xs font-bold w-4 text-center">${item.quantity}</span>
+                            <button onclick="changeQty('${item.name}', 1)" class="w-6 h-6 rounded-md bg-dark-surface border border-dark-border flex items-center justify-center text-xs text-gray-300 hover:text-white">+</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Savat modalini ochish/yopish
+        function toggleCart() {
+            const drawer = document.getElementById('cart-drawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        // Mobil menyuni ochish/yopish
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        function toggleMobileMenu() {
+            mobileMenu.classList.add('hidden');
+        }
+
+        // Telegram orqali buyurtma berish
+        function checkoutOrder() {
+            if (cart.length === 0) {
+                showToast("Savatingiz bo'sh, iltimos taom tanlang!", "error");
+                return;
+            }
+
+            let msg = "Assalomu alaykum, Bahor Kafe! Men veb-sayt orqali quyidagi taomlarni buyurtma qilmoqchiman:\n\n";
+            let total = 0;
+
+            cart.forEach((i, idx) => {
+                const subtotal = i.price * i.quantity;
+                total += subtotal;
+                msg += `${idx + 1}. ${i.name} x ${i.quantity} dona = ${subtotal.toLocaleString()} so'm\n`;
+            });
+
+            msg += `\nJami to'lov: ${total.toLocaleString()} so'm`;
+            msg += "\nIltimos, buyurtmani tasdiqlash uchun bog'laning!";
+
+            const encodedMsg = encodeURIComponent(msg);
+            // Telegram bot yoki menejer kontaktiga yo'naltirish
+            window.open(`https://t.me/share/url?url=&text=${encodedMsg}`, '_blank');
+        }
+
+        // Stol band qilish
+        function handleBooking(e) {
+            e.preventDefault();
+            showToast("Stol band qilindi! Operatorimiz tez orada bog'lanadi.");
+            document.getElementById('booking-form').reset();
+        }
+
+        // Toast xabarnomasi
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+            if (type === "error") {
+                toastIcon.className = "fa-solid fa-triangle-exclamation text-red-500 text-lg";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-check text-gold-500 text-lg";
+            }
+
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-32', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
